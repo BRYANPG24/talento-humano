@@ -1,0 +1,157 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Roboto', sans-serif;
+  list-style: none;
+  text-decoration: none;
+}
+.logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 20px;
+
+}
+.logosidebar {
+  width: 100px;
+  height: auto;
+} 
+.sidebar_input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  outline: none;
+  cursor: pointer;
+}
+.sidebar_input:focus {
+  border: 1px solid white;
+}
+.body {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  width: 100%;
+  height: 100vh;
+}
+.sidebar {
+  background-color: rgb(255, 103, 103);
+  color: white;
+  width: 20%;
+  height: 100vh;
+  padding: 10px;
+}
+
+.sidebar h2 {
+  padding: 20px;
+  text-align: center;
+}
+
+.sidebar ul {
+  padding: 20px;
+}
+.text_white {
+  color: white;
+
+}
+
+.menu_btn {
+  padding: 10px 10px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+  border-radius: 5px;
+  transition: 0.1s ease;
+  width: 100%;
+
+}
+
+.menu_btn:hover .text_white {
+  color: rgb(41, 41, 41);
+}
+
+.menu_btn:hover {
+  background-color: white;
+  color: rgb(41, 41, 41);
+  cursor: pointer;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu > ul {
+  display: flex;
+  flex-direction: column;
+  justify-content: start;
+  align-items: center;
+  gap: 1rem;
+}
+
+.main {
+  padding: 20px;
+  max-height: 100vh;
+  width: 100%;
+}
+
+.menu_context {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(500px, 500px));
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  transition: 0.1s ease;
+  gap: 1rem;
+
+}
+
+.card_icon {
+  width: 50px;
+  height: 50px;
+}
+
+.card {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 500px;
+  gap: 1rem;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  transition: 0.1s ease;
+}
+.card:hover {
+  background-color: white;
+  cursor: pointer;
+  border-color: #9c9c9c;
+}
+
+.primary_btn {
+  background-color: rgb(255, 103, 103);
+  color: white;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+
+.primary_btn:hover {
+  background-color: white;
+  color: rgb(255, 103, 103);
+  border: 1px solid rgb(255, 103, 103);
+}
+
+.primary_btn:active {
+  background-color: white;
+  color: rgb(255, 103, 103);
+}
