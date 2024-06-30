@@ -40,7 +40,7 @@ const Dashboard = () => {
       cancelButtonText: `Cancelar`,
     }).then((result) => {
       if (result.isConfirmed) {
-        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         navigate("/");
       }
     });
