@@ -1,8 +1,7 @@
 import styles from "./infoempleado.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   faBars,
   faBell,
@@ -29,7 +28,6 @@ const InfoEmpleado = () => {
   const { toast } = useToast();
   const { id } = useParams();
 
-  
   useEffect(() => {
     if (!localStorage.getItem("user")) {
       navigate("/");
@@ -55,11 +53,64 @@ const InfoEmpleado = () => {
       lastName: empleado.lastName,
       departamento: empleado.departamento,
       email: empleado.email,
-      telefono: empleado.telefono
+      telefono: empleado.telefono,
     });
     console.log(empleado);
-  }, []); 
 
+  }, []);
+  const handleAgregarTarea = () => {
+    Swal.fire({
+      title: "Agregar Tarea",
+      html: `
+        <input type="text" id="tarea" class="swal2-input" placeholder="Tarea" required>
+        <input type="text" id="descripcion" class="swal2-input" placeholder="Descripcion" required>
+        <h3>Fecha de vencimiento</h3>
+        <input type="date" id="date" placeholder="Fecha de vencimiento" class="swal2-input">
+        <h3>Prioridad</h3>
+        <select id="prioridad" class="swal2-input">
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
+        <h3>Instrucciones</h3>
+        <input type="file" disabled id="file" class="swal2-input" title="No disponible por el momento">
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Agregar",
+      preConfirm: () => {
+        return {
+          tarea: document.getElementById("tarea").value,
+          descripcion: document.getElementById("descripcion").value,
+          date: document.getElementById("date").value,
+          prioridad: document.getElementById("prioridad").value,
+        };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const data = JSON.parse(localStorage.getItem("empleados"));
+        if (!data) {
+          toast("error", "No hay empleados registrados");
+          return;
+        }
+        console.log(data.findIndex((empleado) => empleado.id === parseInt(id)));
+        console.log(empleado);
+        empleado.tareas = empleado.tareas || [];
+        empleado.tareas.push({
+          id: empleado.tareas.length + 1,
+          tarea: result.value.tarea,
+          descripcion: result.value.descripcion,
+          date: result.value.date,
+          prioridad: result.value.prioridad,
+        });
+        localStorage.setItem("empleados", JSON.stringify(data));
+        toast("success", "Tarea agregada correctamente");
+      }
+    });
+  };
+
+  const volverEmpleados = () => {
+    navigate("/empleados");
+  };
   const noAbiableFunction = () => {
     toast("warning", "Esta funcion no esta disponible");
   };
@@ -86,6 +137,69 @@ const InfoEmpleado = () => {
       }
     });
   };
+
+  const deleteEmepleado = () => {
+    const data = JSON.parse(localStorage.getItem("empleados"));
+    const newData = data.filter((empleado) => empleado.id !== parseInt(id));
+    localStorage.setItem("empleados", JSON.stringify(newData));
+    setEmpleado(newData);
+    toast("success", "Empleado eliminado correctamente");
+    navigate("/empleados");
+  };
+
+  const editarEmpleado = () => {
+    Swal.fire({
+      title: "Editar Empleado",
+      html: `
+        <input type="text" id="name" class="swal2-input" placeholder="Nombre" value="${empleado.name}" required>
+        <input type="text" id="lastName" class="swal2-input" placeholder="Apellido" value="${empleado.lastName}" required>
+        <input type="email" id="email" class="swal2-input" placeholder="Correo electronico" value="${empleado.email}" required>
+        <input type="text" id="departamento" class="swal2-input" placeholder="Departamento" value="${empleado.departamento}" required>
+        <input type="text" id="telefono" class="swal2-input" placeholder="Telefono" value="${empleado.telefono}" required>
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Editar",
+      preConfirm: () => {
+        return {
+          name: document.getElementById("name").value,
+          lastName: document.getElementById("lastName").value,
+          email: document.getElementById("email").value,
+          departamento: document.getElementById("departamento").value,
+          telefono: document.getElementById("telefono").value,
+        };
+      },
+    }).then((result) => {
+      const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,6}$/;
+      if (!emailRegex.test(result.value.email)) {
+        toast("error", "Correo electronico invalido", false);
+        return;
+      }
+      const data = JSON.parse(localStorage.getItem("empleados"));
+      const newData = data.map((empleado) => {
+        if (empleado.id === parseInt(id)) {
+          return {
+            id: empleado.id,
+            name: result.value.name,
+            lastName: result.value.lastName,
+            email: result.value.email,
+            departamento: result.value.departamento,
+            telefono: result.value.telefono,
+          };
+        }
+        return empleado;
+      });
+      localStorage.setItem("empleados", JSON.stringify(newData));
+      setEmpleado({
+        id: empleado.id,
+        name: result.value.name,
+        lastName: result.value.lastName,
+        email: result.value.email,
+        departamento: result.value.departamento,
+        telefono: result.value.telefono,
+      });
+    });
+  };
+
   return (
     <div className={styles.body}>
       <div className={styles.sidebar}>
@@ -147,8 +261,62 @@ const InfoEmpleado = () => {
         </div>
       </div>
       <div className={styles.main}>
-        <h1>Info empleados :D</h1>
-        <p>{id}</p>
+        <span>
+          <button className={styles.primary_btn} onClick={volverEmpleados}>
+            Volver
+          </button>
+        </span>
+        <h1>
+          Informacion: {empleado.name} {empleado.lastName}
+        </h1>
+        <div className={styles.container}>
+          <div className={styles.card}>
+            <div className={styles.cardtop}>
+              <img src={perfil} alt="" className={styles.img} />
+              <div>
+                <h2 className={styles.color_primary}>
+                  <strong>
+                    {empleado.name} {empleado.lastName}
+                  </strong>
+                </h2>
+                <p>{empleado.departamento}</p>
+              </div>
+            </div>
+            <div className={styles.cardmid}>
+              <h3>Informacion</h3>
+              <p>
+                <strong>Correo:</strong> {empleado.email}
+              </p>
+              <p>
+                <strong>Telefono:</strong> {empleado.telefono}
+              </p>
+            </div>
+            <div className={styles.cardbottom}>
+              <div className={styles.actions}>
+                <button className={styles.primary_btn} onClick={editarEmpleado}>
+                  Editar
+                </button>
+                <button
+                  className={styles.primary_btn}
+                  onClick={deleteEmepleado}
+                >
+                  Eliminar
+                </button>
+              </div>
+              <div>
+                <button
+                  className={styles.secondary_btn}
+                  onClick={handleAgregarTarea}
+                >
+                  Agregar tarea
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className={styles.task_container}>
+
+        </div>
       </div>
     </div>
   );
