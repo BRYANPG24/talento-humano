@@ -1,5 +1,6 @@
 import styles from "./infoempleado.module.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -15,12 +16,54 @@ import perfil from "../../../assets/perfil.png";
 import logo from "../../../assets/logo.png";
 import { useToast } from "../../../hooks/useToast";
 const InfoEmpleado = () => {
+  const [empleado, setEmpleado] = useState({
+    id: "",
+    name: "",
+    lastName: "",
+    departamento: "",
+    email: "",
+    telefono: "",
+  });
+
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { id } = useParams();
+
+  
+  useEffect(() => {
+    if (!localStorage.getItem("user")) {
+      navigate("/");
+    }
+    // bucamos el empleado por el id en local storage
+    // y lo mostramos en pantalla
+    const empleados = JSON.parse(localStorage.getItem("empleados"));
+    console.log(empleados);
+    if (!empleados || empleados.length === 0) {
+      toast("error", "No hay empleados registrados");
+      navigate("/empleados");
+    }
+
+    const empleado = empleados.find((empleado) => empleado.id === parseInt(id));
+    if (!empleado) {
+      toast("error", "No se encontro el empleado");
+      navigate("/empleados");
+    }
+
+    setEmpleado({
+      id: empleado.id,
+      name: empleado.name,
+      lastName: empleado.lastName,
+      departamento: empleado.departamento,
+      email: empleado.email,
+      telefono: empleado.telefono
+    });
+    console.log(empleado);
+  }, []); 
 
   const noAbiableFunction = () => {
     toast("warning", "Esta funcion no esta disponible");
   };
+
   const handleNotification = () => {
     Swal.fire({
       title: "Notificaciones",
@@ -105,6 +148,7 @@ const InfoEmpleado = () => {
       </div>
       <div className={styles.main}>
         <h1>Info empleados :D</h1>
+        <p>{id}</p>
       </div>
     </div>
   );

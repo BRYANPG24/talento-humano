@@ -258,9 +258,10 @@ const Empleados = () => {
           {empleados.length > 0 ? (
             empleados.map((empleado, index) => {
               return (
-                <div className={styles.empleado_card} key={index} onClick={() => verEmpleado(empleado.id)}>
+                <div className={styles.empleado_card} key={index}>
                   <div className={styles.empleado_info}>
                     <img
+                      onClick={() => verEmpleado(empleado.id)}
                       src={perfil}
                       alt=""
                       className={styles.empleado_card_icon}
