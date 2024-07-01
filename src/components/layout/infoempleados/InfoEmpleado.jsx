@@ -23,7 +23,7 @@ const InfoEmpleado = () => {
     email: "",
     telefono: "",
   });
-
+  const [tareas, setTareas] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { id } = useParams();
@@ -57,7 +57,22 @@ const InfoEmpleado = () => {
     });
     console.log(empleado);
 
+    // buscamos las tareas del empleado
+    const tasks = JSON.parse(localStorage.getItem("tasks"));
+    if (!tasks || tasks.length === 0) {
+      toast("error", "No hay tareas registradas");
+      return;
+    }
+    const tareasEmpleado = tasks.filter(
+      (task) => task.idEmployee === parseInt(id)
+    );
+    if (!tareasEmpleado || tareasEmpleado.length === 0) {
+      toast("error", "No hay tareas registradas para este empleado");
+      return;
+    }
+    setTareas(tareasEmpleado);
   }, []);
+
   const handleAgregarTarea = () => {
     Swal.fire({
       title: "Agregar Tarea",
@@ -92,9 +107,20 @@ const InfoEmpleado = () => {
           toast("error", "No hay empleados registrados");
           return;
         }
-        console.log(data.findIndex((empleado) => empleado.id === parseInt(id)));
-        console.log(empleado);
-        empleado.tareas = empleado.tareas || [];
+        // console.log(data.findIndex((empleado) => empleado.id === parseInt(id)));
+        // console.log(empleado);
+        const tasksEmployee = JSON.parse(localStorage.getItem("tasks")) || [];
+        tasksEmployee.push({
+          id: tasksEmployee.length + 1,
+          idEmployee: empleado.id,
+          tarea: result.value.tarea,
+          descripcion: result.value.descripcion,
+          date: result.value.date,
+          prioridad: result.value.prioridad,
+        });
+        localStorage.setItem("tasks", JSON.stringify(tasksEmployee));
+        toast("success", "Tarea agregada correctamente");
+        /* empleado.tareas = empleado.tareas || [];
         empleado.tareas.push({
           id: empleado.tareas.length + 1,
           tarea: result.value.tarea,
@@ -102,8 +128,8 @@ const InfoEmpleado = () => {
           date: result.value.date,
           prioridad: result.value.prioridad,
         });
-        localStorage.setItem("empleados", JSON.stringify(data));
         toast("success", "Tarea agregada correctamente");
+        return localStorage.setItem("empleados", JSON.stringify(data)); */
       }
     });
   };
@@ -123,7 +149,61 @@ const InfoEmpleado = () => {
       confirmButtonText: "Aceptar",
     });
   };
+  const editTask = (id) => {
+    Swal.fire({
+      title: "Editar Tarea",
+      html: `
+        <input type="text" id="tarea" class="swal2-input" placeholder="Tarea" required>
+        <input type="text" id="descripcion" class="swal2-input" placeholder="Descripcion" required>
+        <h3>Fecha de vencimiento</h3>
+        <input type="date" id="date" placeholder="Fecha de vencimiento" class="swal2-input">
+        <h3>Prioridad</h3>
+        <select id="prioridad" class="swal2-input">
+          <option value="baja">Baja</option>
+          <option value="media">Media</option>
+          <option value="alta">Alta</option>
+        </select>
+        <h3>Instrucciones</h3>
+        <input type="file" disabled id="file" class="swal2-input" title="No disponible por el momento">
+      `,
+      showCancelButton: true,
+      confirmButtonText: "Editar",
+      preConfirm: () => {
+        return {
+          tarea: document.getElementById("tarea").value,
+          descripcion: document.getElementById("descripcion").value,
+          date: document.getElementById("date").value,
+          prioridad: document.getElementById("prioridad").value,
+        };
+      },
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const data = JSON.parse(localStorage.getItem("tasks"));
+        const newData = data.map((task) => {
+          if (task.id === parseInt(id)) {
+            return {
+              id: task.id,
+              idEmployee: empleado.id,
+              tarea: result.value.tarea,
+              descripcion: result.value.descripcion,
+              date: result.value.date,
+              prioridad: result.value.prioridad,
+            };
+          }
+          return task;
+        });
+        localStorage.setItem("tasks", JSON.stringify(newData));
+        toast("success", "Tarea editada correctamente");
+      }
+    });
+  }
 
+  const deleteTask = (id) => {
+    const data = JSON.parse(localStorage.getItem("tasks"));
+    const newData = data.filter((task) => task.id !== parseInt(id));
+    localStorage.setItem("tasks", JSON.stringify(newData));
+    toast("success", "Tarea eliminada correctamente");
+  }
   const handleLogout = () => {
     Swal.fire({
       title: "¿Estas seguro de cerrar sesion?",
@@ -197,6 +277,8 @@ const InfoEmpleado = () => {
         departamento: result.value.departamento,
         telefono: result.value.telefono,
       });
+      toast("success", "Empleado editado correctamente");
+      console.log(empleado);
     });
   };
 
@@ -315,7 +397,37 @@ const InfoEmpleado = () => {
           </div>
         </div>
         <div className={styles.task_container}>
-
+          <table className={styles.table}>
+            <thead className={styles.thead}>
+              <tr className={styles.tr}>
+                <th className={styles.th}>Id</th>
+                <th className={styles.th}>Tarea</th>
+                <th className={styles.th}>Descripcion</th>
+                <th className={styles.th}>Fecha de vencimiento</th>
+                <th className={styles.th}>Prioridad</th>
+                <th className={styles.th}>Acciones</th>
+              </tr>
+            </thead>
+            <tbody className={styles.tbody}>
+              {tareas.map((task) => {
+                if (task.idEmployee === parseInt(id)) {
+                  return (
+                    <tr key={task.id}>
+                      <td className={styles.td}>{task.id}</td>
+                      <td className={styles.td}>{task.tarea}</td>
+                      <td className={styles.td}>{task.descripcion}</td>
+                      <td className={styles.td}>{task.date}</td>
+                      <td className={styles.td}>{task.prioridad}</td>
+                      <td className={styles.td}>
+                        <button className={styles.primary_btn} onClick={() => editTask(task.id)}>Editar</button>
+                        <button className={styles.primary_btn} onClick={() => deleteTask(task.id)}>Eliminar</button>
+                      </td>
+                    </tr>
+                  );
+                }
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
